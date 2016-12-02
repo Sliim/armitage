@@ -414,20 +414,25 @@ sub main {
 	#
 	if (size(@ARGV) < 5) {
 		println("Armitage deconfliction server requires the following arguments:
-	armitage --server host port user pass 
-		host  - the address of this host (where msfrpcd is running as well)
-		port  - the port msfrpcd is listening on
-		user  - the username for msfrpcd
-		pass  - the password for msfprcd
-		lport - [optional] port to bind the team server to");
+	armitage --server host port user pass
+		host    - the address of this host (where msfrpcd is running as well)
+		port    - the port msfrpcd is listening on
+		user    - the username for msfrpcd
+		pass    - the password for msfprcd
+		lport   - [optional] port to bind the team server to
+		rpchost - [optional] msfrpc host");
 		[System exit: 0];
 	}
-	
-	local('$host $port $user $pass $sport');
-	($host, $port, $user, $pass, $sport) = sublist(@_, 1);
+
+	local('$host $port $user $pass $sport $rpchost');
+	($host, $port, $user, $pass, $sport, $rpchost) = sublist(@_, 1);
 
 	if ($sport is $null) {
 		$sport = $port + 1;
+	}
+
+    if ($rpchost is $null) {
+		$rpchost = "127.0.0.1";
 	}
 
 	#
@@ -447,10 +452,10 @@ sub main {
 	# Connect to Metasploit's RPC Daemon
 	#
 
-	$client = [new MsgRpcImpl: $user, $pass, "127.0.0.1", long($port), $null, $null];
+	$client = [new MsgRpcImpl: $user, $pass, $rpchost, long($port), $null, $null];
 	while ($client is $null) {
 		sleep(1000);
-		$client = [new MsgRpcImpl: $user, $pass, "127.0.0.1", long($port), $null, $null];
+		$client = [new MsgRpcImpl: $user, $pass, $rpchost, long($port), $null, $null];
 	}
 	$mclient = $client;
 	initConsolePool(); # this needs to happen... right now.
